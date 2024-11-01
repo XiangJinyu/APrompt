@@ -6,7 +6,8 @@ import asyncio
 from typing import Dict, Literal, Tuple, List, Any
 
 from utils import load
-from utils.response import responser  # 确保导入的是函数而不是模块
+from utils.response import responser, extract_content
+from prompt.evaluate_prompt import EVALUATE_PROMPT
 
 
 # If you want to customize tasks, add task types here and provide evaluation functions, just like the ones given above
@@ -52,9 +53,9 @@ class Evaluator:
         return f"{base_path}_test.jsonl" if test else f"{base_path}_validate.jsonl"
 
 
-class QuickEvaluator:
+class QuickExecute:
     """
-    Complete the evaluation for different datasets here.
+    完成不同数据集的评估。
     """
 
     def __init__(self, prompt: str, k: int = 3):
@@ -62,13 +63,13 @@ class QuickEvaluator:
         self.k = k
 
     async def prompt_evaluate(self) -> tuple[Any]:
-        _, qa = load.load_meta_data(k=self.k)
+        _, _, qa = load.load_meta_data(k=self.k)
         answers = []
 
         async def fetch_answer(q: str) -> Dict[str, Any]:
             messages = [{"role": "user", "content": self.prompt.format(question=q)}]
             try:
-                answer = responser(messages)  # Assuming response is an async function
+                answer = await responser(messages)  # 确保这是一个异步调用
                 return {'question': q, 'answer': answer}
             except Exception as e:
                 return {'question': q, 'answer': str(e)}
@@ -78,10 +79,39 @@ class QuickEvaluator:
 
         return answers
 
+class QuickEvaluate:
+    """
+    Complete the evaluation for different datasets here.
+    """
+
+    def __init__(self, k: int = 3):
+        self.k = k
+
+    async def prompt_evaluate(self, sample: list, new_sample: list) -> bool:
+        _, requirement, qa = load.load_meta_data(k=self.k)
+
+        messages = [{"role": "user", "content": EVALUATE_PROMPT.format(requirement=requirement, sample=sample, new_sample=new_sample, answers=str(qa))}]
+        try:
+            resp = await responser(messages)  # Assuming responser is an async function
+
+            choose = extract_content(resp, 'choose')
+
+            if choose == "B":
+                return True
+            else:
+                return False
+
+        except Exception as e:
+            print(e)
+            return False
+
+
+
+
 
 if __name__ == "__main__":
-    evaluator = QuickEvaluator(prompt="回答问题，{question}", k=3)
+    execute = QuickExecute(prompt="回答问题，{question}", k=3)
 
     # 使用asyncio.run来运行异步方法
-    answers = asyncio.run(evaluator.prompt_evaluate())
+    answers = asyncio.run(execute.prompt_evaluate())
     print(answers)

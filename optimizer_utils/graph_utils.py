@@ -4,13 +4,6 @@ import re
 import time
 import traceback
 from typing import List
-
-from metagpt.ext.aflow.scripts.prompts.optimize_prompt import (
-    WORKFLOW_CUSTOM_USE,
-    WORKFLOW_INPUT,
-    WORKFLOW_OPTIMIZE_PROMPT,
-    WORKFLOW_TEMPLATE,
-)
 from utils.logs import logger
 
 
@@ -24,16 +17,21 @@ class GraphUtils:
         return directory
 
     def load_prompt(self, round_number: int, workflows_path: str):
-        workflows_path = workflows_path.replace("\\", ".").replace("/", ".")
-        graph_module_name = f"{workflows_path}.round_{round_number}.graph"
+        graph_file_name = f"{workflows_path}/prompt.txt"
 
         try:
-            graph_module = __import__(graph_module_name, fromlist=[""])
-            graph_class = getattr(graph_module, "Workflow")
-            return graph_class
-        except ImportError as e:
+            with open(graph_file_name, 'r', encoding='utf-8') as file:
+                return file.read()  # 直接返回文本内容
+        except FileNotFoundError as e:
             logger.info(f"Error loading graph for round {round_number}: {e}")
             raise
+
+    def write_prompt(self, directory: str, prompt: str):
+
+        with open(os.path.join(directory, "prompt.txt"), "w", encoding="utf-8") as file:
+            file.write(prompt)
+        with open(os.path.join(directory, "__init__.py"), "w", encoding="utf-8") as file:
+            file.write("")
 
     def read_graph_files(self, round_number: int, workflows_path: str):
         prompt_file_path = os.path.join(workflows_path, f"round_{round_number}", "prompt.py")
@@ -72,7 +70,7 @@ class GraphUtils:
             interface = matched_data["interface"]
             return f"{id}. {operator_name}: {desc}, with interface {interface})."
 
-    def create_graph_optimize_prompt(
+    def create_prompt_optimize_prompt(
         self,
         experience: str,
         score: float,

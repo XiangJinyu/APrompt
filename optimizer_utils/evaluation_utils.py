@@ -1,32 +1,44 @@
-from script.evaluator import Evaluator
+import asyncio
 
-
+from script.evaluator import QuickEvaluate, QuickExecute
 class EvaluationUtils:
     def __init__(self, root_path: str):
         self.root_path = root_path
 
-    async def evaluate_initial_round(self, optimizer, graph_path, directory, validation_n, data):
+    async def execute_prompt(self, optimizer, graph_path, data, initial=False):
         # 使用 optimizer 的 graph_utils 来加载图
-        optimizer.graph = optimizer.graph_utils.load_graph(optimizer.round, graph_path)
-        evaluator = Evaluator(eval_path=directory)
+        optimizer.prompt = optimizer.graph_utils.load_prompt(optimizer.round, graph_path)
+        evaluator = QuickExecute(prompt=optimizer.prompt, k=3)
 
-        for i in range(validation_n):
-            score, avg_cost, total_cost = await evaluator.graph_evaluate(
-                optimizer.dataset,
-                optimizer.graph,
-                {"dataset": optimizer.dataset, "llm_config": optimizer.execute_llm_config},
-                directory,
-                self.root_path,
-                is_test=False,
-            )
+        # 使用 await 而不是 asyncio.run()
+        answers = await evaluator.prompt_evaluate()
 
-            new_data = optimizer.data_utils.create_result_data(optimizer.round, score, avg_cost, total_cost)
-            data.append(new_data)
+        cur_round = optimizer.round + 1 if not initial else optimizer.round
 
-            result_path = optimizer.data_utils.get_results_file_path(graph_path)
-            optimizer.data_utils.save_results(result_path, data)
+        new_data = {"round": cur_round, "answers": answers, "prompt": optimizer.prompt}
 
-        return data
+        return new_data
+
+
+    async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, initial=False):
+
+        # 使用 optimizer 的 graph_utils 来加载图
+        evaluator = QuickEvaluate(k=3)
+
+        if initial is True:
+            succeed = True
+        else:
+            succeed = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample)
+
+        new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'], new_sample['prompt'], succeed)
+
+        data.append(new_data)
+
+        result_path = optimizer.data_utils.get_results_file_path(path)
+
+        optimizer.data_utils.save_results(result_path, data)
+
+        return succeed
 
     async def evaluate_graph(self, optimizer, directory, validation_n, data, initial=False):
         evaluator = Evaluator(eval_path=directory)

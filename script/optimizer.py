@@ -5,75 +5,44 @@
 
 import asyncio
 import time
-from typing import List, Literal
-
-from pydantic import BaseModel, Field
-
-from evaluator import DatasetType
-from optimizer_utils.convergence_utils import ConvergenceUtils
 from optimizer_utils.data_utils import DataUtils
 from optimizer_utils.evaluation_utils import EvaluationUtils
 from optimizer_utils.experience_utils import ExperienceUtils
 from optimizer_utils.graph_utils import GraphUtils
+from prompt.optimize_prompt import PROMPT_OPTIMIZE_PROMPT
+from utils import load
 from utils.logs import logger
-
-
-QuestionType = Literal["math", "code", "qa"]
-OptimizerType = Literal["Graph", "Test"]
-
-
-class GraphOptimize(BaseModel):
-    modification: str = Field(default="", description="modification")
-    prompt: str = Field(default="", description="prompt")
+from utils.response import responser, extract_content
 
 
 class Optimizer:
     def __init__(
         self,
-        dataset: DatasetType,
-        question_type: QuestionType,
-        opt_llm_config,
-        exec_llm_config,
-        operators: List,
-        sample: int,
-        check_convergence: bool = False,
         optimized_path: str = None,
         initial_round: int = 1,
         max_rounds: int = 20,
-        validation_rounds: int = 5,
+        name: str = "test"
     ) -> None:
-        self.optimize_llm_config = opt_llm_config
-        self.optimize_llm = create_llm_instance(self.optimize_llm_config)
-        self.execute_llm_config = exec_llm_config
-
-        self.dataset = dataset
-        self.type = question_type
-        self.check_convergence = check_convergence
-
-        self.graph = None
-        self.operators = operators
-
+        self.dataset = name
         self.root_path = f"{optimized_path}/{self.dataset}"
-        self.sample = sample
         self.top_scores = []
         self.round = initial_round
         self.max_rounds = max_rounds
-        self.validation_rounds = validation_rounds
 
         self.graph_utils = GraphUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
         self.experience_utils = ExperienceUtils(self.root_path)
         self.evaluation_utils = EvaluationUtils(self.root_path)
-        self.convergence_utils = ConvergenceUtils(self.root_path)
 
-    def optimize(self, mode: OptimizerType = "Graph"):
-        if mode == "Test":
-            test_n = 3  # validation datasets's execution number
-            for i in range(test_n):
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                score = loop.run_until_complete(self.test())
-            return None
+
+    def optimize(self):
+        # if mode == "Test":
+        #     test_n = 3  # validation datasets's execution number
+        #     for i in range(test_n):
+        #         loop = asyncio.new_event_loop()
+        #         asyncio.set_event_loop(loop)
+        #         score = loop.run_until_complete(self.test())
+        #     return None
 
         for opt_round in range(self.max_rounds):
             loop = asyncio.new_event_loop()
@@ -113,47 +82,63 @@ class Optimizer:
         if self.round == 1:
             directory = self.graph_utils.create_round_directory(prompt_path, self.round)
             # Load graph using graph_utils
-            self.prompt = self.graph_utils.load_prompt(self.round, prompt_path)
-            avg_score = await self.evaluation_utils.execute_prompt(self, directory, validation_n, data, initial=True)
+
+            prompt, _, _ = load.load_meta_data()
+            self.prompt = prompt
+            self.graph_utils.write_prompt(directory, prompt=self.prompt)
+
+            new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=True)
+            await self.evaluation_utils.evaluate_prompt(self, None, new_sample, path=prompt_path, data=data, initial=True)
+
 
         # Create a loop until the generated graph meets the check conditions
 
+        _, requirements, qa = load.load_meta_data(3)
+
         directory = self.graph_utils.create_round_directory(prompt_path, self.round + 1)
 
-        top_round = self.data_utils.get_best_round(self.sample)
+        top_round = self.data_utils.get_best_round()
+
         sample = top_round
 
-        prompt = self.graph_utils.read_prompt_files(sample["round"], prompt_path)
+        prompt = sample['prompt']
 
-        processed_experience = self.experience_utils.load_experience()
-        experience = self.experience_utils.format_experience(processed_experience, sample["round"])
+        # processed_experience = self.experience_utils.load_experience()
 
-        log_data = self.data_utils.load_log(sample["round"])
+        # experience = self.experience_utils.format_experience(processed_experience, sample["round"])
 
-        graph_optimize_prompt = self.graph_utils.create_prompt_optimize_prompt(
-            experience, sample["score"], graph[0], prompt, operator_description, self.type, log_data
-        )
+        # log_data = self.data_utils.load_log(sample["round"])
 
-        graph_optimize_node = await ActionNode.from_pydantic(GraphOptimize).fill(
-            context=graph_optimize_prompt, mode="xml_fill", llm=self.optimize_llm
-        )
+        graph_optimize_prompt = PROMPT_OPTIMIZE_PROMPT.format(
+            prompt=sample["prompt"], answers=sample["answers"],
+            requirements=requirements,
+            golden_answers=qa)
 
-        response = await self.graph_utils.get_prompt_optimize_response(graph_optimize_node)
+        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}])
 
-        # Save the graph and evaluate
-        self.graph_utils.write_prompt_files(directory, response, self.round + 1, self.dataset)
+        modification = extract_content(response, "modification")
+        prompt = extract_content(response, "prompt")
 
-        experience = self.experience_utils.create_experience_data(sample, response["modification"])
+        # # Save the graph and evaluate
+        # self.graph_utils.write_prompt_files(directory, response, self.round + 1, self.dataset)
+        # experience = self.experience_utils.create_experience_data(sample, modification)
 
-        self.graph = self.graph_utils.load_prompt(self.round + 1, prompt_path)
+        self.prompt = prompt
 
         logger.info(directory)
 
-        avg_score = await self.evaluation_utils.execute_prompt(self, directory, validation_n, data, initial=False)
+        self.graph_utils.write_prompt(directory, prompt=self.prompt)
 
-        self.experience_utils.update_experience(directory, experience, avg_score)
+        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=False)
 
-        return avg_score
+        success = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, path=prompt_path, data=data, initial=False)
+
+        logger.info(prompt)
+        logger.info(success)
+
+        # self.experience_utils.update_experience(directory, experience, avg_score)
+
+        return None
 
     async def test(self):
         rounds = [5]  # You can choose the rounds you want to test here.

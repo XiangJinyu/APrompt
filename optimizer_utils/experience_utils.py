@@ -84,7 +84,7 @@ class ExperienceUtils:
         return {
             "father node": sample["round"],
             "modification": modification,
-            "before": sample["score"],
+            "before": sample["prompt"],
             "after": None,
             "succeed": None,
         }

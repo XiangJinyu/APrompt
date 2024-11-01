@@ -24,25 +24,17 @@ class DataUtils:
                     return []
         return []
 
-    def get_top_rounds(self, sample: int, path=None, mode="Graph"):
-        self._load_scores(path, mode)
-        unique_rounds = set()
-        unique_top_scores = []
+    def get_best_round(self, path=None, mode="Graph"):
+        # 加载分数数据
+        top_rounds = self._load_scores(path, mode)
 
-        first_round = next((item for item in self.top_scores if item["round"] == 1), None)
-        if first_round:
-            unique_top_scores.append(first_round)
-            unique_rounds.add(1)
+        # 遍历已排序的top_scores，查找succeed为True的最大round
+        for entry in self.top_scores:
+            if entry["succeed"]:
+                return entry  # 返回整个字典
 
-        for item in self.top_scores:
-            if item["round"] not in unique_rounds:
-                unique_top_scores.append(item)
-                unique_rounds.add(item["round"])
-
-                if len(unique_top_scores) >= sample:
-                    break
-
-        return unique_top_scores
+        # 如果没有succeed为True的round，返回None或其他默认值
+        return None
 
     def select_round(self, items):
         if not items:
@@ -120,9 +112,9 @@ class DataUtils:
     def get_results_file_path(self, graph_path: str) -> str:
         return os.path.join(graph_path, "results.json")
 
-    def create_result_data(self, round: int, score: float, avg_cost: float, total_cost: float) -> dict:
+    def create_result_data(self, round: int, answers: list[dict], prompt: str, succeed: bool) -> dict:
         now = datetime.datetime.now()
-        return {"round": round, "score": score, "avg_cost": avg_cost, "total_cost": total_cost, "time": now}
+        return {"round": round, "answers": answers, "prompt": prompt, "succeed": succeed, "time": now}
 
     def save_results(self, json_file_path: str, data: list):
         with open(json_file_path, "w") as json_file:
@@ -141,11 +133,12 @@ class DataUtils:
             data = json.load(file)
         df = pd.DataFrame(data)
 
-        scores_per_round = df.groupby("round")["score"].mean().to_dict()
+        # 遍历每个round，提取succeed字段
+        for index, row in df.iterrows():
+            self.top_scores.append({"round": row["round"], "succeed": row["succeed"], "prompt": row["prompt"], "answers":row['answers']})
 
-        for round_number, average_score in scores_per_round.items():
-            self.top_scores.append({"round": round_number, "score": average_score})
-
-        self.top_scores.sort(key=lambda x: x["score"], reverse=True)
+        # 按round降序排序
+        self.top_scores.sort(key=lambda x: x["round"], reverse=True)
 
         return self.top_scores
+

@@ -1,16 +1,27 @@
-WORKFLOW_OPTIMIZE_PROMPT = """You are building a Graph and corresponding Prompt to jointly solve {type} problems. 
-Referring to the given graph and prompt, which forms a basic example of a {type} solution approach, 
-please reconstruct and optimize them. You can add, modify, or delete nodes, parameters, or prompts. Include your 
-single modification in XML tags in your reply. Ensure they are complete and correct to avoid runtime failures. When 
-optimizing, you can incorporate critical thinking methods like review, revise, ensemble (generating multiple answers through different/similar prompts, then voting/integrating/checking the majority to obtain a final answer), selfAsk, etc. Consider 
-Python's loops (for, while, list comprehensions), conditional statements (if-elif-else, ternary operators), 
-or machine learning techniques (e.g., linear regression, decision trees, neural networks, clustering). The graph 
-complexity should not exceed 10. Use logical and control flow (IF-ELSE, loops) for a more enhanced graphical 
-representation.Ensure that all the prompts required by the current graph from prompt_custom are included.Exclude any other prompts.
-Output the modified graph and all the necessary Prompts in prompt_custom (if needed).
-The prompt you need to generate is only the one used in `prompt_custom.XXX` within Custom. Other methods already have built-in prompts and are prohibited from being generated. Only generate those needed for use in `prompt_custom`; please remove any unused prompts in prompt_custom.
-the generated prompt must not contain any placeholders.
-Considering information loss, complex graphs may yield better results, but insufficient information transmission can omit the solution. It's crucial to include necessary context during the process."""
+PROMPT_OPTIMIZE_PROMPT = """You are building a prompt to address user requirement.Based on the given prompt, 
+please reconstruct and optimize it. You can add, modify, or delete prompts. Please include a single modification in 
+XML tags in your reply. During the optimization, you can incorporate critical thinking methods and any thinking 
+models.
+This is a prompt that performed excellently in a previous iteration. You must make further optimizations and improvements based on this prompt. The modified prompt must differ from the provided example.
+
+requirements:
+{requirements}
+
+reference prompt:
+{prompt}
+
+The execution result of this reference prompt is:
+{answers}
+
+The best answer we expect:
+{golden_answers}
+
+现在给出你的分析，优化点以及优化后的完整的prompt，使用如下的XML格式封装
+
+<analyse>分析参考的prompt产生的结果还有哪些缺点以及如何改进。</analyse>
+<modification>要进行改进的要点,一句话总结</modification>
+<prompt>给出优化后完整的prompt</prompt>
+"""
 
 
 WORKFLOW_INPUT = """
