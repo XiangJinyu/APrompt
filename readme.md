@@ -54,7 +54,7 @@ optimizer = Optimizer(
     max_rounds=30,
     name="your_prompt_name",
 )
-# Optimize workflow via setting the optimizer's mode to 'Graph'
+
 optimizer.optimize()
 ```
 
