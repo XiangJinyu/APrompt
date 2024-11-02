@@ -45,6 +45,8 @@ faq:
 ```
 
 ### 3. Implement the Optimizer 🔧
+
+Use `main.py` to execute:
 ```python
 optimizer = Optimizer(
     optimized_path="workspace",
