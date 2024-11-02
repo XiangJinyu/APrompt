@@ -36,39 +36,11 @@ class Optimizer:
 
 
     def optimize(self):
-        # if mode == "Test":
-        #     test_n = 3  # validation datasets's execution number
-        #     for i in range(test_n):
-        #         loop = asyncio.new_event_loop()
-        #         asyncio.set_event_loop(loop)
-        #         score = loop.run_until_complete(self.test())
-        #     return None
 
         for opt_round in range(self.max_rounds):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-
-            retry_count = 0
-            max_retries = 1
-
-            while retry_count < max_retries:
-                try:
-                    score = loop.run_until_complete(self._optimize_prompt())
-                    break
-                except Exception as e:
-                    retry_count += 1
-                    logger.info(f"Error occurred: {e}. Retrying... (Attempt {retry_count}/{max_retries})")
-                    if retry_count == max_retries:
-                        logger.info("Max retries reached. Moving to next round.")
-                        score = None
-
-                    wait_time = 5 * retry_count
-                    time.sleep(wait_time)
-
-                if retry_count < max_retries:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
+            score = loop.run_until_complete(self._optimize_prompt())
             self.round += 1
             logger.info(f"Score for round {self.round}: {score}")
 
@@ -86,9 +58,9 @@ class Optimizer:
             prompt, _, _ = load.load_meta_data()
             self.prompt = prompt
             self.graph_utils.write_prompt(directory, prompt=self.prompt)
-
             new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=True)
-            await self.evaluation_utils.evaluate_prompt(self, None, new_sample, path=prompt_path, data=data, initial=True)
+            _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, path=prompt_path, data=data, initial=True)
+            self.graph_utils.write_answers(directory, answers=answers)
 
 
         # Create a loop until the generated graph meets the check conditions
@@ -103,12 +75,6 @@ class Optimizer:
 
         prompt = sample['prompt']
 
-        # processed_experience = self.experience_utils.load_experience()
-
-        # experience = self.experience_utils.format_experience(processed_experience, sample["round"])
-
-        # log_data = self.data_utils.load_log(sample["round"])
-
         graph_optimize_prompt = PROMPT_OPTIMIZE_PROMPT.format(
             prompt=sample["prompt"], answers=sample["answers"],
             requirements=requirements,
@@ -119,10 +85,6 @@ class Optimizer:
         modification = extract_content(response, "modification")
         prompt = extract_content(response, "prompt")
 
-        # # Save the graph and evaluate
-        # self.graph_utils.write_prompt_files(directory, response, self.round + 1, self.dataset)
-        # experience = self.experience_utils.create_experience_data(sample, modification)
-
         self.prompt = prompt
 
         logger.info(directory)
@@ -131,31 +93,13 @@ class Optimizer:
 
         new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=False)
 
-        success = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, path=prompt_path, data=data, initial=False)
+        success, answers = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, path=prompt_path, data=data, initial=False)
+
+        self.graph_utils.write_answers(directory, answers=answers)
 
         logger.info(prompt)
         logger.info(success)
 
-        # self.experience_utils.update_experience(directory, experience, avg_score)
+        logger.info(self.round)
 
-        return None
-
-    async def test(self):
-        rounds = [5]  # You can choose the rounds you want to test here.
-        data = []
-
-        graph_path = f"{self.root_path}/workflows_test"
-        json_file_path = self.data_utils.get_results_file_path(graph_path)
-
-        data = self.data_utils.load_results(graph_path)
-
-        for round in rounds:
-            directory = self.graph_utils.create_round_directory(graph_path, round)
-            self.prompt = self.graph_utils.load_prompt(round, graph_path)
-
-            score = await self.evaluation_utils.evaluate_graph_test(self, directory, is_test=True)
-
-            new_data = self.data_utils.create_result_data(round, score)
-            data.append(new_data)
-
-            self.data_utils.save_results(json_file_path, data)
+        return prompt

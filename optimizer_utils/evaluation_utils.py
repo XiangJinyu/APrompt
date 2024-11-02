@@ -38,7 +38,9 @@ class EvaluationUtils:
 
         optimizer.data_utils.save_results(result_path, data)
 
-        return succeed
+        answers = new_sample['answers']
+
+        return succeed, answers
 
     async def evaluate_graph(self, optimizer, directory, validation_n, data, initial=False):
         evaluator = Evaluator(eval_path=directory)

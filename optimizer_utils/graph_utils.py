@@ -26,12 +26,21 @@ class GraphUtils:
             logger.info(f"Error loading graph for round {round_number}: {e}")
             raise
 
+    def write_answers(self, directory: str, answers: dict):
+
+        with open(os.path.join(directory, "answers.txt"), "w", encoding="utf-8") as file:
+            for item in answers:
+                file.write(f"问题: {item['question']}\n")
+                file.write(f"回答: {item['answer']}\n")
+                file.write("\n")
+
     def write_prompt(self, directory: str, prompt: str):
 
         with open(os.path.join(directory, "prompt.txt"), "w", encoding="utf-8") as file:
             file.write(prompt)
         with open(os.path.join(directory, "__init__.py"), "w", encoding="utf-8") as file:
             file.write("")
+
 
     def read_graph_files(self, round_number: int, workflows_path: str):
         prompt_file_path = os.path.join(workflows_path, f"round_{round_number}", "prompt.py")
