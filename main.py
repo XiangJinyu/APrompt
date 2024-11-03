@@ -43,7 +43,9 @@ if __name__ == "__main__":
         optimized_path="workspace",
         initial_round=1,
         max_rounds=30,
-        name="luxun",
+        name="gsm8k_wo_4o_mini",
+        optimize_model="claude-3-5-sonnet-20240620",
+        execute_model="gpt-4o-mini"
     )
 
     # Optimize workflow via setting the optimizer's mode to 'Graph'

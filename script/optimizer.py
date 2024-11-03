@@ -21,13 +21,17 @@ class Optimizer:
         optimized_path: str = None,
         initial_round: int = 1,
         max_rounds: int = 20,
-        name: str = "test"
+        name: str = "test",
+        execute_model: str = "gpt-4o",
+        optimize_model: str = "gpt-4o-mini",
     ) -> None:
         self.dataset = name
         self.root_path = f"{optimized_path}/{self.dataset}"
         self.top_scores = []
         self.round = initial_round
         self.max_rounds = max_rounds
+        self.execute_model = execute_model
+        self.optimize_model = optimize_model
 
         self.graph_utils = GraphUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
@@ -58,8 +62,8 @@ class Optimizer:
             prompt, _, _ = load.load_meta_data()
             self.prompt = prompt
             self.graph_utils.write_prompt(directory, prompt=self.prompt)
-            new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=True)
-            _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, path=prompt_path, data=data, initial=True)
+            new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model, initial=True)
+            _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.optimize_model,path=prompt_path, data=data, initial=True)
             self.graph_utils.write_answers(directory, answers=answers)
 
 
@@ -80,7 +84,7 @@ class Optimizer:
             requirements=requirements,
             golden_answers=qa)
 
-        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}])
+        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}], model=self.optimize_model)
 
         modification = extract_content(response, "modification")
         prompt = extract_content(response, "prompt")
@@ -91,9 +95,9 @@ class Optimizer:
 
         self.graph_utils.write_prompt(directory, prompt=self.prompt)
 
-        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, initial=False)
+        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model, initial=False)
 
-        success, answers = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, path=prompt_path, data=data, initial=False)
+        success, answers = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, model=self.optimize_model, path=prompt_path, data=data, initial=False)
 
         self.graph_utils.write_answers(directory, answers=answers)
 

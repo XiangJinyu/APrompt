@@ -58,9 +58,10 @@ class QuickExecute:
     完成不同数据集的评估。
     """
 
-    def __init__(self, prompt: str, k: int = 3):
+    def __init__(self, prompt: str, k: int = 3, model: str = "gpt-4o-mini"):
         self.prompt = prompt
         self.k = k
+        self.model = model
 
     async def prompt_evaluate(self) -> tuple[Any]:
         _, _, qa = load.load_meta_data(k=self.k)
@@ -69,7 +70,7 @@ class QuickExecute:
         async def fetch_answer(q: str) -> Dict[str, Any]:
             messages = [{"role": "user", "content": self.prompt.format(question=q)}]
             try:
-                answer = await responser(messages)  # 确保这是一个异步调用
+                answer = await responser(messages, model=self.model)  # 确保这是一个异步调用
                 return {'question': q, 'answer': answer}
             except Exception as e:
                 return {'question': q, 'answer': str(e)}
