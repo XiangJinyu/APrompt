@@ -1,0 +1,48 @@
+prompt: |
+  解决数学问题。用户问题：{question}
+
+requirements: |
+  参考案例中的思考方式进行求解
+
+faq:
+  - question: "A list of positive integers has the following properties:
+
+$\bullet$ The sum of the items in the list is $30$.
+
+$\bullet$ The unique mode of the list is $9$.
+
+$\bullet$ The median of the list is a positive integer that does not appear in the list itself.
+
+Find the sum of the squares of all the items in the list."
+    answer: |
+      Since the median is not in the list, there must not be an odd number of elements. Suppose the list has two elements. To meet the mode condition, both must equal $9$, but this does not satisfy the other conditions.
+      
+      Next, suppose the list has six elements. If there were at least three $9$s, then the other elements would sum to at most $30-27=3$. Since the elements are positive integers, this can only be achieved with the set $\{1,1,1,9,9,9\}$, which violates the unique mode condition. Therefore, there must be exactly two $9$s, and the other four elements must be distinct to satisfy the unique mode condition. Two sets of four unique positive integers add to $12$: $\{1,2,3,6\}$ and $\{1,2,4,5\}$. Neither can act as the remaining four elements since both possibilities violate the constraint that the median is an integer.
+      
+      Next, suppose the list had at least eight elements. For the sake of contradiction, suppose the third-largest element was at least $9$. Then, since every element is a positive integer, the minimum sum would be $1+1+1+1+1+9+9+9>30$. So, to satisfy the unique mode condition, there must be exactly two $9$s, and the other elements must be distinct. But then the minimum sum is $1+2+3+4+5+6+9+9>30$, so the sum constraint can never be satisfied. From these deductions, we conclude that the list has exactly four elements.
+      
+      Note that no element can appear three times in the list, or else the middle-two-largest elements would be equal, violating the condition that the median is not in the list. Therefore, to satisfy the unique mode condition, the list contains two $9$s and two other distinct integers that add to $30-18=12$. Five sets of two unique positive integers add to $12$: $\{1,11\}$, $\{2,10\}$, $\{3,9\}$, $\{4,8\}$, and $\{5,7\}$. The first four options violate the median condition (either they make the median one of the list elements, or they make the median a non-integer). Thus, the set must be $\{5,7,9,9\}$, and the sum of the squares of these elements is $25+49+81+81=\boxed{236}$.
+
+
+  - question: "Among the 900 residents of Aimeville, there are 195 who own a diamond ring, 367 who own a set of golf clubs, and 562 who own a garden spade. In addition, each of the 900 residents owns a bag of candy hearts. There are 437 residents who own exactly two of these things, and 234 residents who own exactly three of these things. Find the number of residents of Aimeville who own all four of these things."
+    answer: |
+      Let $w,x,y,z$ denote the number of residents who own 1,2,3 and 4 of these items, respectively. We know $w+x+y+z=900$, since there are 900 residents in total. This simplifies to
+      
+      $w+z=229$, since we know $x=437$ and $y=234$.
+      
+      Now, we set an equation of the total number of items. We know there are 195 rings, 367 clubs, 562 spades, and 900 candy hearts. Adding these up, there are 2024 (wow! the year!) items in total. Thus, $w+2x+3y+4z=2024$ since we are not adding the number of items each group of people contributes, and this must be equal to the total number of items.
+      
+      Plugging in x and y once more, we get $w+4z=448$. Solving $w+z=229$ and $w+4z=448$, we get $z=\boxed{073}$
+  - question: "Alice chooses a set $A$ of positive integers. Then Bob lists all finite nonempty sets $B$ of positive integers with the property that the maximum element of $B$ belongs to $A$. Bob's list has 2024 sets. Find the sum of the elements of A."
+    answer: |
+      Let $A = \left\{ a_1, a_2, \cdots, a_n \right\}$ with $a_1 < a_2 < \cdots < a_n$.
+      
+      If the maximum element of $B$ is $a_i$ for some $i \in \left\{ 1, 2, \cdots , n \right\}$, then each element in $\left\{ 1, 2, \cdots, a_i- 1 \right\}$ can be either in $B$ or not in $B$. Therefore, the number of such sets $B$ is $2^{a_i - 1}$.
+      
+      Therefore, the total number of sets $B$ is
+      
+      Thus
+      
+      Now, the problem becomes writing 4048 in base 2, say, $4048 = \left( \cdots b_2b_1b_0 \right)_2$. We have $A = \left\{ j \geq 1: b_j = 1 \right\}$.
+      
+      We have $4048 = \left( 111,111,010,000 \right)_2$. Therefore, $A = \left\{ 4, 6, 7, 8, 9, 10, 11 \right\}$. Therefore, the sum of all elements in $A$ is $\boxed{\textbf{(55) }}$.

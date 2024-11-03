@@ -1,0 +1,17 @@
+prompt: |
+  Solve math problems. User question: {question}
+
+requirements: |
+  Please put the final answer at the end. For solving math problems similar to those in examples, provide the best thinking approach. The focus should be on finding the final answer rather than teaching.
+  Provide as much careful thinking and analysis as possible to arrive at the most accurate answer.
+faq:
+  - question: "Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How many clips did Natalia sell altogether in April and May?"
+    answer: |
+      A answer that provides more thought processes is judged to be a good answer.
+
+  - question: "Weng earns $12 an hour for babysitting. Yesterday, she just did 50 minutes of babysitting. How much did she earn?"
+    answer: |
+       A answer that provides more thought processes is judged to be a good answer.
+  - question: "Betty is saving money for a new wallet which costs $100. Betty has only half of the money she needs. Her parents decided to give her $15 for that purpose, and her grandparents twice as much as her parents. How much more money does Betty need to buy the wallet?"
+    answer: |
+       A answer that provides more thought processes is judged to be a good answer.
