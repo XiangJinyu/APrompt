@@ -64,11 +64,11 @@ class QuickExecute:
         self.model = model
 
     async def prompt_evaluate(self) -> tuple[Any]:
-        _, _, qa = load.load_meta_data(k=self.k)
+        _, _, qa, _ = load.load_meta_data(k=self.k)
         answers = []
 
         async def fetch_answer(q: str) -> Dict[str, Any]:
-            messages = [{"role": "user", "content": self.prompt.format(question=q)}]
+            messages = [{"role": "user", "content": f"{self.prompt}\n\n{q}"}]
             try:
                 answer = await responser(messages, model=self.model)  # 确保这是一个异步调用
                 return {'question': q, 'answer': answer}
@@ -89,7 +89,7 @@ class QuickEvaluate:
         self.k = k
 
     async def prompt_evaluate(self, sample: list, new_sample: list) -> bool:
-        _, requirement, qa = load.load_meta_data(k=self.k)
+        _, requirement, qa, _ = load.load_meta_data(k=self.k)
 
         messages = [{"role": "user", "content": EVALUATE_PROMPT.format(requirement=requirement, sample=sample, new_sample=new_sample, answers=str(qa))}]
         try:

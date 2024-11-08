@@ -16,11 +16,11 @@ The execution result of this reference prompt is:
 The best answer we expect:
 {golden_answers}
 
-现在给出你的分析，优化点以及优化后的完整的prompt，使用如下的XML格式封装
+Provide your analysis, optimization points, and the complete optimized prompt using the following XML format:
 
-<analyse>分析参考的prompt产生的结果还有哪些缺点以及如何改进。</analyse>
-<modification>要进行改进的要点,一句话总结</modification>
-<prompt>给出优化后完整的prompt</prompt>
+<analyse>Analyze what drawbacks exist in the results produced by the reference prompt and how to improve them.</analyse>
+<modification>Summarize the key points for improvement in one sentence</modification>
+<prompt>Provide the complete optimized prompt, within {count} words</prompt>
 """
 
 

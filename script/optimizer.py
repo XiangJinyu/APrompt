@@ -59,7 +59,7 @@ class Optimizer:
             directory = self.graph_utils.create_round_directory(prompt_path, self.round)
             # Load graph using graph_utils
 
-            prompt, _, _ = load.load_meta_data()
+            prompt, _, _, _ = load.load_meta_data()
             self.prompt = prompt
             self.graph_utils.write_prompt(directory, prompt=self.prompt)
             new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model, initial=True)
@@ -69,7 +69,7 @@ class Optimizer:
 
         # Create a loop until the generated graph meets the check conditions
 
-        _, requirements, qa = load.load_meta_data(3)
+        _, requirements, qa, count = load.load_meta_data(3)
 
         directory = self.graph_utils.create_round_directory(prompt_path, self.round + 1)
 
@@ -82,7 +82,8 @@ class Optimizer:
         graph_optimize_prompt = PROMPT_OPTIMIZE_PROMPT.format(
             prompt=sample["prompt"], answers=sample["answers"],
             requirements=requirements,
-            golden_answers=qa)
+            golden_answers=qa,
+            count=count)
 
         response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}], model=self.optimize_model)
 

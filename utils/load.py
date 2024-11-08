@@ -28,9 +28,10 @@ def load_meta_data(k=3):
 
     prompt = data['prompt']
     requirements = data['requirements']
+    count = data['count']
 
     # 随机选择三组问答
     random_qa = random.sample(qa, min(k, len(qa)))  # 确保不超过列表长度
 
-    return prompt, requirements, random_qa
+    return prompt, requirements, random_qa, count
 

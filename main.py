@@ -41,9 +41,9 @@ if __name__ == "__main__":
 
     optimizer = Optimizer(
         optimized_path="workspace",
-        initial_round=1,
+        initial_round=22,
         max_rounds=30,
-        name="gsm8k_wo_4o_mini",
+        name="gsm8k_wo_short",
         optimize_model="claude-3-5-sonnet-20240620",
         execute_model="gpt-4o-mini"
     )
