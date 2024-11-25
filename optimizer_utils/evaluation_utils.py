@@ -1,6 +1,8 @@
 import asyncio
 
 from script.evaluator import QuickEvaluate, QuickExecute
+
+
 class EvaluationUtils:
     def __init__(self, root_path: str):
         self.root_path = root_path
@@ -19,7 +21,6 @@ class EvaluationUtils:
 
         return new_data
 
-
     async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, model, initial=False):
 
         # 使用 optimizer 的 graph_utils 来加载图
@@ -28,9 +29,10 @@ class EvaluationUtils:
         if initial is True:
             succeed = True
         else:
-            succeed = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample)
+            succeed = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
 
-        new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'], new_sample['prompt'], succeed)
+        new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'],
+                                                           new_sample['prompt'], succeed)
 
         data.append(new_data)
 

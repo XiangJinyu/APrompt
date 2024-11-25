@@ -88,12 +88,12 @@ class QuickEvaluate:
     def __init__(self, k: int = 3):
         self.k = k
 
-    async def prompt_evaluate(self, sample: list, new_sample: list) -> bool:
+    async def prompt_evaluate(self, sample: list, new_sample: list, model: str) -> bool:
         _, requirement, qa, _ = load.load_meta_data(k=self.k)
 
         messages = [{"role": "user", "content": EVALUATE_PROMPT.format(requirement=requirement, sample=sample, new_sample=new_sample, answers=str(qa))}]
         try:
-            resp = await responser(messages)  # Assuming responser is an async function
+            resp = await responser(messages, model)  # Assuming responser is an async function
 
             choose = extract_content(resp, 'choose')
 

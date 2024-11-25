@@ -15,7 +15,7 @@ client = OpenAI(api_key=config['openai']['api_key'],
 
 
 # 假设你有一个用于生成模型响应的函数
-async def responser(messages, model="claude-3-5-sonnet-20240620", temperature=0.3, max_tokens=4096, max_retries=10):
+async def responser(messages, model, temperature=0.3, max_tokens=4096, max_retries=10):
     retries = 0
     while retries < max_retries:
         try:

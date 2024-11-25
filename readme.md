@@ -34,6 +34,8 @@ prompt: |
 requirements: |
   ...
 
+count: 200
+
 faq:
   - question: "..."
     answer: |
@@ -51,8 +53,10 @@ Use `main.py` to execute:
 optimizer = Optimizer(
     optimized_path="workspace",
     initial_round=1,
-    max_rounds=30,
-    name="your_prompt_name",
+    max_rounds=10,
+    name="your_prompt",
+    optimize_model="claude-3-5-sonnet-20240620",
+    execute_model="gpt-4o-mini"
 )
 
 optimizer.optimize()

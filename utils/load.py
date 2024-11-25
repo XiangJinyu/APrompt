@@ -14,7 +14,7 @@ def load_llm():
 
 def load_meta_data(k=3):
     # 读取 YAML 文件
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'meta.yaml')
+    config_path = os.path.join(os.path.dirname(__file__), '../settings', 'meta.yaml')
     with open(config_path, 'r', encoding='utf-8') as file:
         data = yaml.safe_load(file)
 
