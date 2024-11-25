@@ -26,9 +26,9 @@ class GraphUtils:
             logger.info(f"Error loading graph for round {round_number}: {e}")
             raise
 
-    def write_answers(self, directory: str, answers: dict):
+    def write_answers(self, directory: str, answers: dict, name: str = "answers.txt"):
 
-        with open(os.path.join(directory, "answers.txt"), "w", encoding="utf-8") as file:
+        with open(os.path.join(directory, name), "w", encoding="utf-8") as file:
             for item in answers:
                 file.write(f"问题: {item['question']}\n")
                 file.write(f"回答: {item['answer']}\n")
@@ -40,7 +40,6 @@ class GraphUtils:
             file.write(prompt)
         with open(os.path.join(directory, "__init__.py"), "w", encoding="utf-8") as file:
             file.write("")
-
 
     def read_graph_files(self, round_number: int, workflows_path: str):
         prompt_file_path = os.path.join(workflows_path, f"round_{round_number}", "prompt.py")
@@ -80,14 +79,14 @@ class GraphUtils:
             return f"{id}. {operator_name}: {desc}, with interface {interface})."
 
     def create_prompt_optimize_prompt(
-        self,
-        experience: str,
-        score: float,
-        graph: str,
-        prompt: str,
-        operator_description: str,
-        type: str,
-        log_data: str,
+            self,
+            experience: str,
+            score: float,
+            graph: str,
+            prompt: str,
+            operator_description: str,
+            type: str,
+            log_data: str,
     ) -> str:
         graph_input = WORKFLOW_INPUT.format(
             experience=experience,

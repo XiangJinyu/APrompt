@@ -17,13 +17,14 @@ from utils.response import responser, extract_content
 
 class Optimizer:
     def __init__(
-        self,
-        optimized_path: str = None,
-        initial_round: int = 1,
-        max_rounds: int = 20,
-        name: str = "test",
-        execute_model: str = "gpt-4o",
-        optimize_model: str = "gpt-4o-mini",
+            self,
+            optimized_path: str = None,
+            initial_round: int = 1,
+            max_rounds: int = 20,
+            name: str = "test",
+            execute_model: str = "gpt-4o",
+            optimize_model: str = "gpt-4o-mini",
+            iteration: bool = True
     ) -> None:
         self.dataset = name
         self.root_path = f"{optimized_path}/{self.dataset}"
@@ -32,23 +33,30 @@ class Optimizer:
         self.max_rounds = max_rounds
         self.execute_model = execute_model
         self.optimize_model = optimize_model
+        self.iteration = iteration
 
         self.graph_utils = GraphUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
         self.experience_utils = ExperienceUtils(self.root_path)
         self.evaluation_utils = EvaluationUtils(self.root_path)
 
-
     def optimize(self):
+        if self.iteration is True:
 
-        for opt_round in range(self.max_rounds):
+            for opt_round in range(self.max_rounds):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                score = loop.run_until_complete(self._optimize_prompt())
+                self.round += 1
+                logger.info(f"Score for round {self.round}: {score}")
+
+                time.sleep(5)
+
+        else:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            score = loop.run_until_complete(self._optimize_prompt())
-            self.round += 1
+            score = loop.run_until_complete(self._test_prompt())
             logger.info(f"Score for round {self.round}: {score}")
-
-            time.sleep(5)
 
     async def _optimize_prompt(self):
 
@@ -62,10 +70,11 @@ class Optimizer:
             prompt, _, _, _ = load.load_meta_data()
             self.prompt = prompt
             self.graph_utils.write_prompt(directory, prompt=self.prompt)
-            new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model, initial=True)
-            _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.optimize_model,path=prompt_path, data=data, initial=True)
+            new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
+                                                                    initial=True)
+            _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.optimize_model,
+                                                                     path=prompt_path, data=data, initial=True)
             self.graph_utils.write_answers(directory, answers=answers)
-
 
         # Create a loop until the generated graph meets the check conditions
 
@@ -85,7 +94,8 @@ class Optimizer:
             golden_answers=qa,
             count=count)
 
-        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}], model=self.optimize_model)
+        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}],
+                                   model=self.optimize_model)
 
         modification = extract_content(response, "modification")
         prompt = extract_content(response, "prompt")
@@ -96,9 +106,12 @@ class Optimizer:
 
         self.graph_utils.write_prompt(directory, prompt=self.prompt)
 
-        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model, initial=False)
+        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
+                                                                initial=False)
 
-        success, answers = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample, model=self.optimize_model, path=prompt_path, data=data, initial=False)
+        success, answers = await self.evaluation_utils.evaluate_prompt(self, sample, new_sample,
+                                                                       model=self.optimize_model, path=prompt_path,
+                                                                       data=data, initial=False)
 
         self.graph_utils.write_answers(directory, answers=answers)
 
@@ -108,3 +121,21 @@ class Optimizer:
         logger.info(self.round)
 
         return prompt
+
+    async def _test_prompt(self):
+
+        prompt_path = f"{self.root_path}/workflows"
+        data = self.data_utils.load_results(prompt_path)
+
+        directory = self.graph_utils.create_round_directory(prompt_path, self.round)
+        # Load graph using graph_utils
+
+        new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
+                                                                initial=False, k=100)
+        self.graph_utils.write_answers(directory, answers=new_sample["answers"], name="test_answers")
+
+        logger.info(new_sample)
+
+        logger.info(self.round)
+
+        return None

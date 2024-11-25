@@ -7,10 +7,10 @@ class EvaluationUtils:
     def __init__(self, root_path: str):
         self.root_path = root_path
 
-    async def execute_prompt(self, optimizer, graph_path, data, model, initial=False):
+    async def execute_prompt(self, optimizer, graph_path, data, model, initial=False, k=3):
         # 使用 optimizer 的 graph_utils 来加载图
         optimizer.prompt = optimizer.graph_utils.load_prompt(optimizer.round, graph_path)
-        evaluator = QuickExecute(prompt=optimizer.prompt, k=3, model=model)
+        evaluator = QuickExecute(prompt=optimizer.prompt, k=k, model=model)
 
         # 使用 await 而不是 asyncio.run()
         answers = await evaluator.prompt_evaluate()
