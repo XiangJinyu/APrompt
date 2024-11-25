@@ -50,6 +50,8 @@ faq:
 
 Use `main.py` to execute:
 ```python
+from script.optimizer import Optimizer
+
 optimizer = Optimizer(
     optimized_path="workspace",
     initial_round=1,
