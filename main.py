@@ -15,7 +15,7 @@ if __name__ == "__main__":
         name="novel_content",
         optimize_model="claude-3-5-sonnet-20240620",
         execute_model="claude-3-5-sonnet-20240620",
-        iteration=False,
+        iteration=True,
     )
 
     optimizer.optimize()

@@ -58,9 +58,10 @@ optimizer = Optimizer(
     optimized_path="workspace",
     initial_round=1,
     max_rounds=10,
-    name="your_prompt",
+    name="novel_content",
     optimize_model="claude-3-5-sonnet-20240620",
-    execute_model="gpt-4o-mini"
+    execute_model="claude-3-5-sonnet-20240620",
+    iteration=True,
 )
 
 optimizer.optimize()
