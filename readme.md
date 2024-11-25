@@ -21,7 +21,7 @@ Create a configuration file `config.yaml`:
 ```yaml
 openai:
   api_key: " "
-  base_url: ' '
+  base_url: " "
 ```
 
 ### 2. Define Your Prompt Template 📝
@@ -29,7 +29,7 @@ openai:
 Create a prompt template file `meta.yaml`:
 ```yaml
 prompt: |
-  User problem：{question}
+  solve question.
 
 requirements: |
   ...
@@ -37,11 +37,13 @@ requirements: |
 count: 200
 
 faq:
-  - question: "..."
+  - question: |
+      ...
     answer: |
       ...
 
-  - question: "..."
+  - question: |
+      ...
     answer: |
       ...
 ```
