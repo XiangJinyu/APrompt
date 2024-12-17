@@ -1,7 +1,6 @@
 PROMPT_OPTIMIZE_PROMPT = """You are building a prompt to address user requirement.Based on the given prompt, 
 please reconstruct and optimize it. You can add, modify, or delete prompts. Please include a single modification in 
-XML tags in your reply. During the optimization, you can incorporate critical thinking methods and any thinking 
-models.
+XML tags in your reply. During the optimization, you can incorporate any thinking models.
 This is a prompt that performed excellently in a previous iteration. You must make further optimizations and improvements based on this prompt. The modified prompt must differ from the provided example.
 
 requirements:
@@ -20,7 +19,7 @@ Provide your analysis, optimization points, and the complete optimized prompt us
 
 <analyse>Analyze what drawbacks exist in the results produced by the reference prompt and how to improve them.</analyse>
 <modification>Summarize the key points for improvement in one sentence</modification>
-<prompt>Provide the complete optimized prompt, within {count} words</prompt>
+<prompt>Provide the complete optimized prompt {count}</prompt>
 """
 
 

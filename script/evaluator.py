@@ -6,8 +6,9 @@ import asyncio
 from typing import Dict, Literal, Tuple, List, Any
 
 from utils import load
-from utils.response import responser, extract_content
+from utils.llm_client import responser, extract_content
 from prompt.evaluate_prompt import EVALUATE_PROMPT
+import random
 
 
 # If you want to customize tasks, add task types here and provide evaluation functions, just like the ones given above
@@ -58,20 +59,21 @@ class QuickExecute:
     完成不同数据集的评估。
     """
 
-    def __init__(self, prompt: str, k: int = 3, model: str = "gpt-4o-mini"):
+    def __init__(self, prompt: str, k: int = 3, model=None):
+
         self.prompt = prompt
         self.k = k
         self.model = model
 
-    async def prompt_evaluate(self) -> tuple[Any]:
+    async def prompt_execute(self) -> tuple[Any]:
         _, _, qa, _ = load.load_meta_data(k=self.k)
         answers = []
 
         async def fetch_answer(q: str) -> Dict[str, Any]:
             messages = [{"role": "user", "content": f"{self.prompt}\n\n{q}"}]
             try:
-                answer = await responser(messages, model=self.model)  # 确保这是一个异步调用
-                return {'question': q, 'answer': answer}
+                answer = await responser(messages, model=self.model['name'], temperature=self.model['temperature'])  # 确保这是一个异步调用
+                return {'question': q, 'answer': answer.content}
             except Exception as e:
                 return {'question': q, 'answer': str(e)}
 
@@ -79,6 +81,7 @@ class QuickExecute:
         answers = await asyncio.gather(*tasks)
 
         return answers
+
 
 class QuickEvaluate:
     """
@@ -88,19 +91,30 @@ class QuickEvaluate:
     def __init__(self, k: int = 3):
         self.k = k
 
-    async def prompt_evaluate(self, sample: list, new_sample: list, model: str) -> bool:
+    async def prompt_evaluate(self, sample: list, new_sample: list, model: dict) -> bool:
         _, requirement, qa, _ = load.load_meta_data(k=self.k)
 
-        messages = [{"role": "user", "content": EVALUATE_PROMPT.format(requirement=requirement, sample=sample, new_sample=new_sample, answers=str(qa))}]
+        # 随机决定是否交换样本顺序
+        if random.random() < 0.5:
+            sample, new_sample = new_sample, sample
+            is_swapped = True
+        else:
+            is_swapped = False
+
+        messages = [{"role": "user", "content": EVALUATE_PROMPT.format(
+            requirement=requirement,
+            sample=sample,
+            new_sample=new_sample,
+            answers=str(qa))}]
+
         try:
-            resp = await responser(messages, model)  # Assuming responser is an async function
+            response = await responser(messages, model=model['name'], temperature=model['temperature'])
+            choose = extract_content(response.content, 'choose')
 
-            choose = extract_content(resp, 'choose')
-
-            if choose == "B":
-                return True
-            else:
-                return False
+            # 如果交换了顺序,需要反转结果
+            if is_swapped:
+                return choose == "A"
+            return choose == "B"
 
         except Exception as e:
             print(e)

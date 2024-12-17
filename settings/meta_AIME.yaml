@@ -1,48 +1,117 @@
 prompt: |
-  解决数学问题。用户问题：{question}
+  Solve this problem. 
 
 requirements: |
-  参考案例中的思考方式进行求解
+  Must put the final answer within \\boxed{}.
+  The provided prompt needs to adapt to all AIME questions.
 
 faq:
-  - question: "A list of positive integers has the following properties:
+  - question: |
+      Five men and nine women stand equally spaced around a circle in random order. The probability that every man stands diametrically opposite a woman is $\frac{m}{n},$ where $m$ and $n$ are relatively prime positive integers. Find $m+n.$
 
-$\bullet$ The sum of the items in the list is $30$.
-
-$\bullet$ The unique mode of the list is $9$.
-
-$\bullet$ The median of the list is a positive integer that does not appear in the list itself.
-
-Find the sum of the squares of all the items in the list."
     answer: |
-      Since the median is not in the list, there must not be an odd number of elements. Suppose the list has two elements. To meet the mode condition, both must equal $9$, but this does not satisfy the other conditions.
+      To start off, we calculate the total amount of ways to organize all $14$ people irrespective of any constraints. This is simply ${14\choose5} = 2002$, because we just count how many ways we can place all $5$ men in any of the $14$ slots.
+
+      Since men cannot be diametrically opposite with each other, because of the constraints, placing down one man in any given spot will make another spot on the opposite side of the circle unable to hold any men. This means that placing down one man will effectively take away $2$ spots.
       
-      Next, suppose the list has six elements. If there were at least three $9$s, then the other elements would sum to at most $30-27=3$. Since the elements are positive integers, this can only be achieved with the set $\{1,1,1,9,9,9\}$, which violates the unique mode condition. Therefore, there must be exactly two $9$s, and the other four elements must be distinct to satisfy the unique mode condition. Two sets of four unique positive integers add to $12$: $\{1,2,3,6\}$ and $\{1,2,4,5\}$. Neither can act as the remaining four elements since both possibilities violate the constraint that the median is an integer.
+      There are $14$ possible slots the first man can be placed. Once that man was placed, the next man only have $12$ possible slots because the slot that the first man is in is taken and the diametrically opposite spot to the first man can't have any men. Similar logic applies for the third man, who has $10$ possible slots. The fourth man has $8$ possible slots, and the fifth man has $6$ possible slots.
       
-      Next, suppose the list had at least eight elements. For the sake of contradiction, suppose the third-largest element was at least $9$. Then, since every element is a positive integer, the minimum sum would be $1+1+1+1+1+9+9+9>30$. So, to satisfy the unique mode condition, there must be exactly two $9$s, and the other elements must be distinct. But then the minimum sum is $1+2+3+4+5+6+9+9>30$, so the sum constraint can never be satisfied. From these deductions, we conclude that the list has exactly four elements.
+      This means the number of ways you can place all $5$ men down is $14 \cdot 12 \cdot 10 \cdot 8 \cdot 6$. However, since the men are all indistinct from each other, you also have to divide that value by $5! = 120$, since there are $120$ ways to arrange the $5$ men in each possible positioning of the men on the circle. This means the total number of ways to arrange the men around the circle so that none of them are diametrically opposite of each other is: $\frac{14 \cdot 12 \cdot 10 \cdot 8 \cdot 6}{5!} = 672$. The women simply fill in the rest of the available slots in each arrangement of men.
       
-      Note that no element can appear three times in the list, or else the middle-two-largest elements would be equal, violating the condition that the median is not in the list. Therefore, to satisfy the unique mode condition, the list contains two $9$s and two other distinct integers that add to $30-18=12$. Five sets of two unique positive integers add to $12$: $\{1,11\}$, $\{2,10\}$, $\{3,9\}$, $\{4,8\}$, and $\{5,7\}$. The first four options violate the median condition (either they make the median one of the list elements, or they make the median a non-integer). Thus, the set must be $\{5,7,9,9\}$, and the sum of the squares of these elements is $25+49+81+81=\boxed{236}$.
+      Thus, the final probability is $\frac{672}{2002} = \frac{48}{143}$, meaning the answer is $48 + 143 = \boxed{191}$.
+ 
+
+  - question: |
+      A plane contains $40$ lines, no $2$ of which are parallel. Suppose that there are $3$ points where exactly $3$ lines intersect, $4$ points where exactly $4$ lines intersect, $5$ points where exactly $5$ lines intersect, $6$ points where exactly $6$ lines intersect, and no points where more than $6$ lines intersect. Find the number of points where exactly $2$ lines intersect.
+
+    answer: |
+      In this solution, let $\boldsymbol{n}$-line points be the points where exactly $n$ lines intersect. We wish to find the number of $2$-line points.
+      
+      There are $\binom{40}{2}=780$ pairs of lines. Among them:
+      
+      The $3$-line points account for $3\cdot\binom32=9$ pairs of lines.
+      The $4$-line points account for $4\cdot\binom42=24$ pairs of lines.
+      The $5$-line points account for $5\cdot\binom52=50$ pairs of lines.
+      The $6$-line points account for $6\cdot\binom62=90$ pairs of lines.
+      It follows that the $2$-line points account for $780-9-24-50-90=\boxed{607}$ pairs of lines, where each pair intersect at a single point.
+
+  - question: |
+      Rhombus $ABCD$ has $\angle BAD < 90^\circ.$ There is a point $P$ on the incircle of the rhombus such that the distances from $P$ to the lines $DA,AB,$ and $BC$ are $9,$ $5,$ and $16,$ respectively. Find the perimeter of $ABCD.$
+
+    answer: |
+      Label the points of the rhombus to be $X$, $Y$, $Z$, and $W$ and the center of the incircle to be $O$ so that $9$, $5$, and $16$ are the distances from point $P$ to side $ZW$, side $WX$, and $XY$ respectively. Through this, we know that the distance from the two pairs of opposite lines of rhombus $XYZW$ is $25$ and circle $O$ has radius $\frac{25}{2}$.
+      
+      Call the feet of the altitudes from $P$ to side $ZW$, side $WX$, and side $XY$ to be $A$, $B$, and $C$ respectively. Additionally, call the feet of the altitudes from $O$ to side $ZW$, side $WX$, and side $XY$ to be $D$, $E$, and $F$ respectively.
+      
+      Draw a line segment from $P$ to $\overline{OD}$ so that it is perpendicular to $\overline{OD}$. Notice that this segment length is equal to $AD$ and is $\sqrt{\left(\frac{25}{2}\right)^2-\left(\frac{7}{2}\right)^2}=12$ by Pythagorean Theorem.
+      
+      Similarly, perform the same operations with perpendicular from $P$ to $\overline{OE}$ to get $BE=10$.
+      
+      By equal tangents, $WD=WE$. Now, label the length of segment $WA=n$ and $WB=n+2$.
+      
+      Using Pythagorean Theorem again, we get
+      
+      \begin{align*} WA^2+PA^2&=WB^2+PB^2 \\ n^2+9^2&=(n+2)^2+5^2 \\ n&=13. \end{align*}
+      
+      Which also gives us $\tan{\angle{OWX}}=\frac{1}{2}$ and $OW=\frac{25\sqrt{5}}{2}$.
+      
+      Since the diagonals of the rhombus intersect at $O$ and are angle bisectors and are also perpendicular to each other, we can get that
+      
+      \begin{align*} \frac{OX}{OW}&=\tan{\angle{OWX}} \\ OX&=\frac{25\sqrt{5}}{4} \\ WX^2&=OW^2+OX^2 \\ WX&=\frac{125}{4} \\ 4WX&=\boxed{125}. \end{align*}
+
+  - question: |
+      Find the largest prime number $p<1000$ for which there exists a complex number $z$ satisfying
+
+      the real and imaginary part of $z$ are both integers;
+      $|z|=\sqrt{p},$ and
+      there exists a triangle whose three side lengths are $p,$ the real part of $z^{3},$ and the imaginary part of $z^{3}.$
+    answer: |
+      Assume that $z=a+bi$. Then,\[z^3=(a^3-3ab^2)+(3a^2b-b^3)i\]Note that by the Triangle Inequality,\[|(a^3-3ab^2)-(3a^2b-b^3)|<p\implies |a^3+b^3-3ab^2-3a^2b|<a^2+b^2\]Thus, we know\[|a+b||a^2+b^2-4ab|<a^2+b^2\]Without loss of generality, assume $a>b$ (as otherwise, consider $i^3\overline z=b+ai$). If $|a/b|\geq 4$, then\[17b^2\geq a^2+b^2>|a+b||a^2+b^2-4ab|\geq |b-4b||16b^2-16b^2+b^2|=3b^3\]`Thus, this means $b\leq\frac{17}3$ or $b\leq 5$. Also note that the roots of $x^2-4x+1$ are $2\pm\sqrt 3$, so thus if $b\geq 6$,\[2\sqrt 3b=(2(2-\sqrt 3)-4)b<a<4b\]Note that\[1000>p=a^2+b^2\geq 12b^2+b^2=13b^2\]so $b^2<81$, and $b<9$. If $b=8$, then $16\sqrt 3\leq a\leq 32$. Note that $\gcd(a,b)=1$, and $a\not\equiv b\pmod 2$, so $a=29$ or $31$. However, then $5\mid a^2+b^2$, absurd.
+      
+      If $b=7$, by similar logic, we have that $14\sqrt 3 <a< 28$, so $b=26$. However, once again, $5\mid a^2+b^2$. If $b=6$, by the same logic, $12\sqrt3<a<24$, so $a=23$, where we run into the same problem. Thus $b\leq 5$ indeed.
+      
+      If $b=5$, note that\[(a+5)(a^2+25-20a)<a^2+25\implies a<20\]We note that $p=5^2+18^2=349$ works. Thus, we just need to make sure that if $b\leq 4$, $a\leq 18$. But this is easy, as\[p>(a+b)(a^2+b^2-4ab)\geq (4+18)(4^2+18^2-4\cdot 4\cdot 18)>1000\]absurd. Thus, the answer is $\boxed{349}$.
+
+  - question: |
+      Find the number of subsets of $\{1,2,3,\ldots,10\}$ that contain exactly one pair of consecutive integers. Examples of such subsets are $\{\mathbf{1},\mathbf{2},5\}$ and $\{1,3,\mathbf{6},\mathbf{7},10\}.$
+    answer: |
+      We can solve this problem using casework, with one case for each possible pair of consecutive numbers.
+
+      $\textbf{Case 1: (1,2)}$
+
+      If we have (1,2) as our pair, we are left with the numbers from 3-10 as elements that can be added to our subset. So, we must compute how many ways we can pick these numbers so that the set has no consecutive numbers other than (1,2). Our first option is to pick no more numbers, giving us $8 \choose {0}$. We can also pick one number, giving us $7 \choose {1}$ because 3 cannot be picked. Another choice is to pick two numbers and in order to make sure they are not consecutive we must fix one number in between them, giving us $6 \choose {2}$. This pattern continues for each amount of numbers, yielding $5 \choose {3}$ for 3 numbers and $4 \choose {4}$ for four numbers. Adding these up, we have $8 \choose {0}$ + $7 \choose {1}$ + $6 \choose {2}$ + $5 \choose {3}$ + $4 \choose {4}$ = $\textbf{34}$.
 
 
-  - question: "Among the 900 residents of Aimeville, there are 195 who own a diamond ring, 367 who own a set of golf clubs, and 562 who own a garden spade. In addition, each of the 900 residents owns a bag of candy hearts. There are 437 residents who own exactly two of these things, and 234 residents who own exactly three of these things. Find the number of residents of Aimeville who own all four of these things."
-    answer: |
-      Let $w,x,y,z$ denote the number of residents who own 1,2,3 and 4 of these items, respectively. We know $w+x+y+z=900$, since there are 900 residents in total. This simplifies to
-      
-      $w+z=229$, since we know $x=437$ and $y=234$.
-      
-      Now, we set an equation of the total number of items. We know there are 195 rings, 367 clubs, 562 spades, and 900 candy hearts. Adding these up, there are 2024 (wow! the year!) items in total. Thus, $w+2x+3y+4z=2024$ since we are not adding the number of items each group of people contributes, and this must be equal to the total number of items.
-      
-      Plugging in x and y once more, we get $w+4z=448$. Solving $w+z=229$ and $w+4z=448$, we get $z=\boxed{073}$
-  - question: "Alice chooses a set $A$ of positive integers. Then Bob lists all finite nonempty sets $B$ of positive integers with the property that the maximum element of $B$ belongs to $A$. Bob's list has 2024 sets. Find the sum of the elements of A."
-    answer: |
-      Let $A = \left\{ a_1, a_2, \cdots, a_n \right\}$ with $a_1 < a_2 < \cdots < a_n$.
-      
-      If the maximum element of $B$ is $a_i$ for some $i \in \left\{ 1, 2, \cdots , n \right\}$, then each element in $\left\{ 1, 2, \cdots, a_i- 1 \right\}$ can be either in $B$ or not in $B$. Therefore, the number of such sets $B$ is $2^{a_i - 1}$.
-      
-      Therefore, the total number of sets $B$ is
-      
-      Thus
-      
-      Now, the problem becomes writing 4048 in base 2, say, $4048 = \left( \cdots b_2b_1b_0 \right)_2$. We have $A = \left\{ j \geq 1: b_j = 1 \right\}$.
-      
-      We have $4048 = \left( 111,111,010,000 \right)_2$. Therefore, $A = \left\{ 4, 6, 7, 8, 9, 10, 11 \right\}$. Therefore, the sum of all elements in $A$ is $\boxed{\textbf{(55) }}$.
+
+      $\textbf{Case 2: (2,3)}$
+
+      If we have (2,3) as our pair, everything works the same as with (1,2), because 1 is still unusable as it is consecutive with 2. The only difference is we now have only 4-10 to work with. Using the same pattern as before, we have $7 \choose {0}$ + $6 \choose {1}$ + $5 \choose {2}$ + $4 \choose {3}$ = $\textbf{21}$.
+
+
+
+      $\textbf{Case 3: (3,4)}$
+
+      This case remains pretty much the same except we now have an option of whether or not to include 1. If we want to represent this like we have with our other choices, we would say $2 \choose {0}$ for choosing no numbers and $1 \choose {1}$ for choosing 1, leaving us with $2 \choose {0}$ + $1 \choose {1}$ = 2 choices (either including the number 1 in our subset or not including it). As far as the numbers from 5-10, our pattern from previous cases still holds. We have $6 \choose {0}$ + $5 \choose {1}$ + $4 \choose {2}$ + $3 \choose {3}$ = 13. With 2 choices on one side and 13 choices on the other side, we have $2\cdot13$ = $\textbf{26}$ combinations in all.
+
+
+
+      $\textbf{Case 4: (4,5)}$
+
+      Following the patterns we have already created in our previous cases, for the numbers 1-3 we have $3 \choose {0}$ + $2 \choose {1}$ = 3 choices (1, 2, or neither) and for the numbers 6-10 we have $5 \choose {0}$ + $4 \choose {1}$ + $3 \choose {2}$ = 8 choices. With 3 choices on one side and 8 choices on the other side, we have $3\cdot8$ = $\textbf{24}$ combinations in all.
+
+
+
+      $\textbf{Case 5: (5,6)}$
+
+      Again following the patterns we have already created in our previous cases, for the numbers 1-4 we have $4 \choose {0}$ + $3 \choose {1}$ + $2 \choose {2}$ = 5 choices and for the numbers 5-10 we have the same $4 \choose {0}$ + $3 \choose {1}$ + $2 \choose {2}$ = 5 choices. $5\cdot5$ = $\textbf{25}$ combinations in all.
+
+
+
+      $\textbf{Rest of the cases}$
+
+      By symmetry, the case with (6,7) will act the same as case 4 with (4,5). This goes the same for (7,8) and case 3, (8.9) and case 2, and (9,10) and case 1.
+
+
+
+      Now, we simply add up all of the possibilities for each case to get our final answer. 34 + 21 + 26 + 24 + 25 + 24 + 26 + 21 + 34 = $\boxed{\textbf{(235)}}$
+

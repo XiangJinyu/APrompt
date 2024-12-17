@@ -1,2 +1,5 @@
 PyYAML~=6.0.2
 openai~=1.51.2
+tiktoken~=0.8.0
+numpy~=2.1.2
+pandas~=2.2.3

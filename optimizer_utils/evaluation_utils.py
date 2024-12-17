@@ -1,6 +1,7 @@
 import asyncio
 
 from script.evaluator import QuickEvaluate, QuickExecute
+from utils.logs import logger
 
 
 class EvaluationUtils:
@@ -13,7 +14,7 @@ class EvaluationUtils:
         evaluator = QuickExecute(prompt=optimizer.prompt, k=k, model=model)
 
         # 使用 await 而不是 asyncio.run()
-        answers = await evaluator.prompt_evaluate()
+        answers = await evaluator.prompt_execute()
 
         cur_round = optimizer.round + 1 if not initial else optimizer.round
 
@@ -29,7 +30,17 @@ class EvaluationUtils:
         if initial is True:
             succeed = True
         else:
-            succeed = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
+            # 连续执行三次评估
+            evaluation_results = []
+            for _ in range(4):
+                result = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
+                evaluation_results.append(result)
+
+            logger.info(evaluation_results)
+
+            true_count = evaluation_results.count(True)
+            false_count = evaluation_results.count(False)
+            succeed = true_count > false_count
 
         new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'],
                                                            new_sample['prompt'], succeed)

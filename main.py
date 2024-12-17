@@ -12,9 +12,12 @@ if __name__ == "__main__":
         optimized_path="workspace",
         initial_round=1,
         max_rounds=10,
-        name="novel_content",
-        optimize_model="claude-3-5-sonnet-20240620",
-        execute_model="claude-3-5-sonnet-20240620",
+        template="Liar_paper.yaml",
+        name="Liar",
+        optimize_model={"name": "gpt-4o", "temperature": 0.7},
+        # {"name": "claude-3-5-sonnet-20240620", "temperature": 0.7}
+        execute_model={"name": "gpt-4o-mini", "temperature": 0},
+        evaluate_model={"name": "gpt-4o-mini", "temperature": 0.3},
         iteration=True,
     )
 

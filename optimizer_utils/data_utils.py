@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import random
+from typing import Union, List, Dict
 
 import numpy as np
 import pandas as pd
@@ -116,9 +117,15 @@ class DataUtils:
         now = datetime.datetime.now()
         return {"round": round, "answers": answers, "prompt": prompt, "succeed": succeed, "time": now}
 
-    def save_results(self, json_file_path: str, data: list):
+    def save_results(self, json_file_path: str, data: Union[List, Dict]):
         with open(json_file_path, "w") as json_file:
             json.dump(data, json_file, default=str, indent=4)
+
+    def save_cost(self, directory: str, data: Union[List, Dict]):
+        json_file = os.path.join(directory, 'cost.json')
+        with open(json_file, "w", encoding="utf-8") as file:
+            json.dump(data, file, default=str, indent=4)
+
 
     def _load_scores(self, path=None, mode="Graph"):
         if mode == "Graph":
@@ -141,4 +148,33 @@ class DataUtils:
         self.top_scores.sort(key=lambda x: x["round"], reverse=True)
 
         return self.top_scores
+
+    def list_to_markdown(self, questions_list):
+        """
+        Convert a list of question-answer dictionaries to a formatted Markdown string.
+
+        Args:
+            questions_list (list): List of dictionaries containing 'question' and 'answer' keys
+
+        Returns:
+            str: Formatted Markdown string
+        """
+        markdown_text = "```\n"
+
+        for i, qa_pair in enumerate(questions_list, 1):
+            # Add question section
+            markdown_text += f"Question {i}\n\n"
+            markdown_text += f"{qa_pair['question']}\n\n"
+
+            # Add answer section
+            markdown_text += f"Answer {i}\n\n"
+            markdown_text += f"{qa_pair['answer']}\n\n"
+
+            # Add separator between QA pairs except for the last one
+            if i < len(questions_list):
+                markdown_text += "---\n\n"
+
+        markdown_text += "\n```"
+
+        return markdown_text
 
