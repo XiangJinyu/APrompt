@@ -146,6 +146,8 @@ class Optimizer:
 
     async def _test_prompt(self):
 
+        load.set_file_name(self.template)
+
         prompt_path = f"{self.root_path}/workflows"
         data = self.data_utils.load_results(prompt_path)
 

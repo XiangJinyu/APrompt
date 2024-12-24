@@ -4,16 +4,24 @@ XML tags in your reply. During the optimization, you can incorporate any thinkin
 This is a prompt that performed excellently in a previous iteration. You must make further optimizations and improvements based on this prompt. The modified prompt must differ from the provided example.
 
 requirements:
+```
 {requirements}
+```
 
 reference prompt:
+```
 {prompt}
+```
 
-The execution result of this reference prompt is:
+The execution result of this reference prompt is(some cases):
+```
 {answers}
+```
 
-The best answer we expect:
+The best answer we expect(some cases):
+```
 {golden_answers}
+```
 
 Provide your analysis, optimization points, and the complete optimized prompt using the following XML format:
 
