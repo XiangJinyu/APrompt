@@ -156,7 +156,7 @@ class Optimizer:
 
         new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                 initial=False, k=100)
-        self.graph_utils.write_answers(directory, answers=new_sample["answers"], name="test_answers")
+        self.graph_utils.write_answers(directory, answers=new_sample["answers"], name="test_answers.txt")
 
         logger.info(new_sample)
 

@@ -10,13 +10,13 @@ if __name__ == "__main__":
 
     optimizer = Optimizer(
         optimized_path="workspace",
-        initial_round=7,
+        initial_round=1,
         max_rounds=10,
-        template="translator.yaml",
-        name="Translator",
+        template="prd_score.yaml",
+        name="PRD_Score",
         optimize_model={"name": "claude-3-5-sonnet-20240620", "temperature": 0.7},
         # {"name": "claude-3-5-sonnet-20240620", "temperature": 0.7}
-        execute_model={"name": "claude-3-5-sonnet-20240620", "temperature": 0},
+        execute_model={"name": "gpt-4o-mini", "temperature": 0},
         evaluate_model={"name": "gpt-4o-mini", "temperature": 0.3},
         iteration=False,
     )
