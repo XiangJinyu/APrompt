@@ -12,13 +12,13 @@ if __name__ == "__main__":
         optimized_path="workspace",
         initial_round=1,
         max_rounds=10,
-        template="prd_score.yaml",
-        name="PRD_Score",
-        optimize_model={"name": "claude-3-5-sonnet-20240620", "temperature": 0.7},
+        template="Navigate_paper.yaml",
+        name="Navigate",
+        optimize_model={"name": "gpt-4o-mini", "temperature": 0.7},
         # {"name": "claude-3-5-sonnet-20240620", "temperature": 0.7}
         execute_model={"name": "gpt-4o-mini", "temperature": 0},
         evaluate_model={"name": "gpt-4o-mini", "temperature": 0.3},
-        iteration=False,
+        iteration=True,
     )
 
     optimizer.optimize()
