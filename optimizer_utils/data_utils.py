@@ -82,7 +82,7 @@ class DataUtils:
 
     def load_log(self, cur_round, path=None, mode: str = "Graph"):
         if mode == "Graph":
-            log_dir = os.path.join(self.root_path, "workflows", f"round_{cur_round}", "log.json")
+            log_dir = os.path.join(self.root_path, "prompts", f"round_{cur_round}", "log.json")
         else:
             log_dir = path
 
@@ -113,9 +113,9 @@ class DataUtils:
     def get_results_file_path(self, graph_path: str) -> str:
         return os.path.join(graph_path, "results.json")
 
-    def create_result_data(self, round: int, answers: list[dict], prompt: str, succeed: bool) -> dict:
+    def create_result_data(self, round: int, answers: list[dict], prompt: str, succeed: bool, tokens: int) -> dict:
         now = datetime.datetime.now()
-        return {"round": round, "answers": answers, "prompt": prompt, "succeed": succeed, "time": now}
+        return {"round": round, "answers": answers, "prompt": prompt, "succeed": succeed, "tokens": tokens, "time": now}
 
     def save_results(self, json_file_path: str, data: Union[List, Dict]):
         with open(json_file_path, "w") as json_file:
@@ -129,7 +129,7 @@ class DataUtils:
 
     def _load_scores(self, path=None, mode="Graph"):
         if mode == "Graph":
-            rounds_dir = os.path.join(self.root_path, "workflows")
+            rounds_dir = os.path.join(self.root_path, "prompts")
         else:
             rounds_dir = path
 

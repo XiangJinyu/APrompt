@@ -27,7 +27,8 @@ class Optimizer:
             execute_model=None,
             optimize_model=None,
             evaluate_model=None,
-            iteration: bool = True
+            iteration: bool = True,
+            reasoning: bool = False,
     ) -> None:
 
         self.dataset = name
@@ -40,6 +41,7 @@ class Optimizer:
         self.evaluate_model = evaluate_model
         self.iteration = iteration
         self.template = template
+        self.reasoning = reasoning
 
         self.graph_utils = GraphUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
@@ -67,7 +69,7 @@ class Optimizer:
 
     async def _optimize_prompt(self):
 
-        prompt_path = f"{self.root_path}/workflows"
+        prompt_path = f"{self.root_path}/prompts"
         load.set_file_name(self.template)
 
         data = self.data_utils.load_results(prompt_path)
@@ -82,7 +84,7 @@ class Optimizer:
             new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                     initial=True)
             _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.evaluate_model,
-                                                                     path=prompt_path, data=data, initial=True)
+                                                                     path=prompt_path, data=data, reason=self.reasoning, initial=True)
             self.graph_utils.write_answers(directory, answers=answers)
 
 
@@ -148,7 +150,7 @@ class Optimizer:
 
         load.set_file_name(self.template)
 
-        prompt_path = f"{self.root_path}/workflows"
+        prompt_path = f"{self.root_path}/prompts"
         data = self.data_utils.load_results(prompt_path)
 
         directory = self.graph_utils.create_round_directory(prompt_path, self.round)

@@ -2,7 +2,15 @@ import asyncio
 
 from script.evaluator import QuickEvaluate, QuickExecute
 from utils.logs import logger
+import tiktoken
 
+
+def count_tokens(sample):
+    if sample is None:
+        return 0
+    else:
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(str(sample['answers'])))
 
 class EvaluationUtils:
     def __init__(self, root_path: str):
@@ -22,28 +30,34 @@ class EvaluationUtils:
 
         return new_data
 
-    async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, model, initial=False):
+    async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, model, reason=False, initial=False):
 
         # 使用 optimizer 的 graph_utils 来加载图
         evaluator = QuickEvaluate(k=3)
+        original_token = count_tokens(sample)
+        new_token = count_tokens(new_sample)
 
         if initial is True:
             succeed = True
         else:
-            # 连续执行三次评估
-            evaluation_results = []
-            for _ in range(4):
-                result = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
-                evaluation_results.append(result)
+            if new_token < original_token and reason:
+                succeed = False
+                logger.info(f"Original sample length: {original_token}, New sample length: {new_token}")
+            else:
+                # 连续执行三次评估
+                evaluation_results = []
+                for _ in range(4):
+                    result = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
+                    evaluation_results.append(result)
 
-            logger.info(evaluation_results)
+                logger.info(evaluation_results)
 
-            true_count = evaluation_results.count(True)
-            false_count = evaluation_results.count(False)
-            succeed = true_count > false_count
+                true_count = evaluation_results.count(True)
+                false_count = evaluation_results.count(False)
+                succeed = true_count > false_count
 
         new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'],
-                                                           new_sample['prompt'], succeed)
+                                                           new_sample['prompt'], succeed, new_token)
 
         data.append(new_data)
 
