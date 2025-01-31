@@ -29,7 +29,7 @@ class EvaluationUtils:
 
         return new_data
 
-    async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, model, reason=False, initial=False):
+    async def evaluate_prompt(self, optimizer, sample, new_sample, path, data, model, initial=False):
 
         evaluator = QuickEvaluate(k=3)
         original_token = count_tokens(sample)
@@ -38,20 +38,16 @@ class EvaluationUtils:
         if initial is True:
             succeed = True
         else:
-            if new_token < original_token and reason:
-                succeed = False
-                logger.info(f"Original sample length: {original_token}, New sample length: {new_token}")
-            else:
-                evaluation_results = []
-                for _ in range(4):
-                    result = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
-                    evaluation_results.append(result)
+            evaluation_results = []
+            for _ in range(4):
+                result = await evaluator.prompt_evaluate(sample=sample, new_sample=new_sample, model=model)
+                evaluation_results.append(result)
 
-                logger.info(evaluation_results)
+            logger.info(evaluation_results)
 
-                true_count = evaluation_results.count(True)
-                false_count = evaluation_results.count(False)
-                succeed = true_count > false_count
+            true_count = evaluation_results.count(True)
+            false_count = evaluation_results.count(False)
+            succeed = true_count > false_count
 
         new_data = optimizer.data_utils.create_result_data(new_sample['round'], new_sample['answers'],
                                                            new_sample['prompt'], succeed, new_token)

@@ -20,14 +20,13 @@ class Optimizer:
             self,
             optimized_path: str = None,
             initial_round: int = 1,
-            max_rounds: int = 20,
+            max_rounds: int = 10,
             name: str = "test",
             template: str = "meta.yaml",
             execute_model=None,
             optimize_model=None,
             evaluate_model=None,
             iteration: bool = True,
-            reasoning: bool = False,
     ) -> None:
 
         self.dataset = name
@@ -40,7 +39,6 @@ class Optimizer:
         self.evaluate_model = evaluate_model
         self.iteration = iteration
         self.template = template
-        self.reasoning = reasoning
 
         self.prompt_utils = PromptUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
@@ -82,7 +80,7 @@ class Optimizer:
             new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                     initial=True)
             _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.evaluate_model,
-                                                                     path=prompt_path, data=data, reason=self.reasoning, initial=True)
+                                                                     path=prompt_path, data=data, initial=True)
             self.prompt_utils.write_answers(directory, answers=answers)
 
 

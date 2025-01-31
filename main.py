@@ -19,7 +19,6 @@ if __name__ == "__main__":
         execute_model={"name": "gpt-4o-mini", "temperature": 0.3},
         evaluate_model={"name": "gpt-4o-mini", "temperature": 0.3},
         iteration=True,
-        reasoning=False,
     )
 
     optimizer.optimize()
