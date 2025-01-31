@@ -28,7 +28,6 @@ class LLMResponse:
 
 def check_tokens(max_input_tokens: Optional[int] = None,
                  encoding_name: str = "cl100k_base"):
-
     def calculate_message_tokens(messages: List[Dict], encoding) -> int:
         total_tokens = 0
         for message in messages:

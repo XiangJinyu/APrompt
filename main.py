@@ -12,12 +12,12 @@ if __name__ == "__main__":
         optimized_path="workspace",
         initial_round=1,
         max_rounds=10,
-        template="Poem_r1.yaml",
-        name="Poem",
-        optimize_model={"name": "deepseek-reasoner", "temperature": 0.7},
+        template="girl_friend.yaml",
+        name="girl_friend_test",
+        optimize_model={"name": "gpt-4o-mini", "temperature": 0.7},
         # {"name": "claude-3-5-sonnet-20240620", "temperature": 0.7}
-        execute_model={"name": "deepseek-reasoner", "temperature": 0.3},
-        evaluate_model={"name": "deepseek-reasoner", "temperature": 0.3},
+        execute_model={"name": "gpt-4o-mini", "temperature": 0.3},
+        evaluate_model={"name": "gpt-4o-mini", "temperature": 0.3},
         iteration=True,
         reasoning=False,
     )

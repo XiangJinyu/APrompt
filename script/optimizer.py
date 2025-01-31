@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 # @Date    : 8/12/2024 22:00 PM
 # @Author  : issac
-# @Desc    : optimizer for graph
+# @Desc    : optimizer for prompt
 
 import asyncio
 import time
 from optimizer_utils.data_utils import DataUtils
 from optimizer_utils.evaluation_utils import EvaluationUtils
-from optimizer_utils.experience_utils import ExperienceUtils
-from optimizer_utils.graph_utils import GraphUtils
+from optimizer_utils.prompt_utils import PromptUtils
 from prompt.optimize_prompt import PROMPT_OPTIMIZE_PROMPT
 from utils import load
 from utils.logs import logger
@@ -43,9 +42,8 @@ class Optimizer:
         self.template = template
         self.reasoning = reasoning
 
-        self.graph_utils = GraphUtils(self.root_path)
+        self.prompt_utils = PromptUtils(self.root_path)
         self.data_utils = DataUtils(self.root_path)
-        self.experience_utils = ExperienceUtils(self.root_path)
         self.evaluation_utils = EvaluationUtils(self.root_path)
         self.token_tracker = get_token_tracker()
 
@@ -75,24 +73,22 @@ class Optimizer:
         data = self.data_utils.load_results(prompt_path)
 
         if self.round == 1:
-            directory = self.graph_utils.create_round_directory(prompt_path, self.round)
-            # Load graph using graph_utils
+            directory = self.prompt_utils.create_round_directory(prompt_path, self.round)
+            # Load prompt using prompt_utils
 
             prompt, _, _, _ = load.load_meta_data()
             self.prompt = prompt
-            self.graph_utils.write_prompt(directory, prompt=self.prompt)
+            self.prompt_utils.write_prompt(directory, prompt=self.prompt)
             new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                     initial=True)
             _, answers = await self.evaluation_utils.evaluate_prompt(self, None, new_sample, model=self.evaluate_model,
                                                                      path=prompt_path, data=data, reason=self.reasoning, initial=True)
-            self.graph_utils.write_answers(directory, answers=answers)
+            self.prompt_utils.write_answers(directory, answers=answers)
 
-
-        # Create a loop until the generated graph meets the check conditions
 
         _, requirements, qa, count = load.load_meta_data(3)
 
-        directory = self.graph_utils.create_round_directory(prompt_path, self.round + 1)
+        directory = self.prompt_utils.create_round_directory(prompt_path, self.round + 1)
 
         top_round = self.data_utils.get_best_round()
 
@@ -105,13 +101,13 @@ class Optimizer:
         golden_answer = self.data_utils.list_to_markdown(qa)
         best_answer = self.data_utils.list_to_markdown(sample["answers"])
 
-        graph_optimize_prompt = PROMPT_OPTIMIZE_PROMPT.format(
+        optimize_prompt = PROMPT_OPTIMIZE_PROMPT.format(
             prompt=sample["prompt"], answers=best_answer,
             requirements=requirements,
             golden_answers=golden_answer,
             count=count)
 
-        response = await responser(messages=[{"role": "user", "content": graph_optimize_prompt}],
+        response = await responser(messages=[{"role": "user", "content": optimize_prompt}],
                                    model=self.optimize_model['name'], temperature=self.optimize_model['temperature'])
 
         modification = extract_content(response.content, "modification")
@@ -123,7 +119,7 @@ class Optimizer:
 
         logger.info(directory)
 
-        self.graph_utils.write_prompt(directory, prompt=self.prompt)
+        self.prompt_utils.write_prompt(directory, prompt=self.prompt)
 
         new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                 initial=False)
@@ -132,7 +128,7 @@ class Optimizer:
                                                                        model=self.evaluate_model, path=prompt_path,
                                                                        data=data, initial=False)
 
-        self.graph_utils.write_answers(directory, answers=answers)
+        self.prompt_utils.write_answers(directory, answers=answers)
 
         logger.info(prompt)
         logger.info(success)
@@ -153,12 +149,12 @@ class Optimizer:
         prompt_path = f"{self.root_path}/prompts"
         data = self.data_utils.load_results(prompt_path)
 
-        directory = self.graph_utils.create_round_directory(prompt_path, self.round)
-        # Load graph using graph_utils
+        directory = self.prompt_utils.create_round_directory(prompt_path, self.round)
+        # Load prompt using prompt_utils
 
         new_sample = await self.evaluation_utils.execute_prompt(self, directory, data, model=self.execute_model,
                                                                 initial=False, k=100)
-        self.graph_utils.write_answers(directory, answers=new_sample["answers"], name="test_answers.txt")
+        self.prompt_utils.write_answers(directory, answers=new_sample["answers"], name="test_answers.txt")
 
         logger.info(new_sample)
 
