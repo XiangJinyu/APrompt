@@ -6,7 +6,6 @@ from datetime import datetime
 
 @dataclass
 class ModelUsage:
-    """单个模型的使用统计"""
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
@@ -21,7 +20,6 @@ class ModelUsage:
 
 @dataclass
 class TokenTracker:
-    """Token使用跟踪器"""
     model_usage: Dict[str, ModelUsage] = field(default_factory=lambda: defaultdict(ModelUsage))
     start_time: datetime = field(default_factory=datetime.now)
 
@@ -29,7 +27,6 @@ class TokenTracker:
         self.model_usage[model].add_usage(input_tokens, output_tokens)
 
     def get_total_usage(self) -> Dict[str, Dict]:
-        """获取所有模型的使用统计"""
         usage = {}
         for model, stats in self.model_usage.items():
             usage[model] = {
@@ -42,7 +39,6 @@ class TokenTracker:
         return usage
 
     def print_usage_report(self):
-        """打印使用报告"""
         duration = datetime.now() - self.start_time
         print("\n=== Token Usage Report ===")
         print(f"Duration: {duration}")
@@ -60,7 +56,6 @@ class TokenTracker:
             print(f"\nEstimated Total Cost: ${total_cost:.3f}")
 
     def calculate_estimated_cost(self) -> float:
-        """计算估算成本 (可根据实际价格调整)"""
         prices = {
             "gpt-4o": {"input": 0.0025, "output": 0.010},
             "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
@@ -85,7 +80,6 @@ _token_tracker = None
 
 
 def get_token_tracker() -> TokenTracker:
-    """获取TokenTracker全局实例"""
     global _token_tracker
     if _token_tracker is None:
         _token_tracker = TokenTracker()

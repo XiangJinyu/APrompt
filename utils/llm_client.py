@@ -8,15 +8,13 @@ import time
 from utils.token_manager import get_token_tracker
 import re
 
-# 配置加载
 config = load.load_llm()
-client = OpenAI(api_key=config['openai']['api_key'],
-                base_url=config['openai']['base_url'])
+client = OpenAI(api_key=config['llm']['api_key'],
+                base_url=config['llm']['base_url'])
 
 
 @dataclass
 class TokenStats:
-    """Token统计信息"""
     input_tokens: int
     response_tokens: int
     total_tokens: int
@@ -24,19 +22,14 @@ class TokenStats:
 
 @dataclass
 class LLMResponse:
-    """LLM响应结果，包含响应内容和token统计"""
     content: Optional[str]
     token_stats: TokenStats
 
 
 def check_tokens(max_input_tokens: Optional[int] = None,
                  encoding_name: str = "cl100k_base"):
-    """
-    装饰器: 用于检查和计算LLM输入消息的token数量，并返回token统计
-    """
 
     def calculate_message_tokens(messages: List[Dict], encoding) -> int:
-        """计算消息列表的总token数"""
         total_tokens = 0
         for message in messages:
             content = message.get("content", "")
@@ -97,7 +90,6 @@ def check_tokens(max_input_tokens: Optional[int] = None,
     return decorator
 
 def extract_content(xml_string, tag):
-    # 构建正则表达式，匹配指定的标签内容
     pattern = rf'<{tag}>(.*?)</{tag}>'
     match = re.search(pattern, xml_string, re.DOTALL)  # 使用 re.DOTALL 以匹配换行符
     return match.group(1).strip() if match else None
@@ -105,7 +97,6 @@ def extract_content(xml_string, tag):
 
 @check_tokens()
 async def responser(messages, model, temperature=0.3, max_tokens=4096, max_retries=3):
-    """LLM响应器"""
     retries = 0
     while retries < max_retries:
         try:
@@ -132,7 +123,6 @@ async def main():
         {"role": "user", "content": "Hello, how are you?"}
     ]
 
-    # 多次调用API测试
     for model in ["gpt-4o", "gpt-4o", "gpt-4o-mini"]:
         result = await responser(messages, model=model)
         print(f"\nModel: {model}")
@@ -140,7 +130,6 @@ async def main():
         print(f"Input tokens: {result.token_stats.input_tokens}")
         print(f"Response tokens: {result.token_stats.response_tokens}")
 
-    # 打印最终统计信息
     get_token_tracker().print_usage_report()
 
 
